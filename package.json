@@ -1,24 +1,22 @@
 {
-  "name": "superstring",
-  "version": "2.4.4",
-  "description": "A data structure to efficiently represent the results of applying patches.",
+  "name": "@curlconverter/superstring",
+  "version": "0.0.1",
+  "description": "A fork of a data structure to efficiently represent the results of applying patches.",
   "main": "./index",
   "browser": "./browser",
   "scripts": {
     "build:node": "node-gyp rebuild",
-    "build:browser": "script/build-browser-version.sh",
-    "build": "npm run build:node && npm run build:browser",
+    "build": "npm run build:node",
     "test:native": "node ./script/test-native.js",
     "test:node": "mocha test/js/*.js",
-    "test:browser": "SUPERSTRING_USE_BROWSER_VERSION=1 mocha test/js/*.js",
-    "test": "npm run test:node && npm run test:browser",
+    "test": "npm run test:node",
     "benchmark": "node benchmark/marker-index.benchmark.js",
-    "prepublishOnly": "git submodule update --init --recursive && npm run build:browser",
+    "prepublishOnly": "git submodule update --init --recursive",
     "standard": "standard --recursive src test"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/atom/superstring.git"
+    "url": "https://github.com/curlconverter/superstring.git"
   },
   "keywords": [
     "text",
@@ -26,12 +24,9 @@
   ],
   "author": "Nathan Sobo <nathan@github.com>",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/atom/superstring/issues"
-  },
-  "homepage": "https://github.com/atom/superstring",
+  "homepage": "https://github.com/curlconverter/superstring",
   "dependencies": {
-    "nan": "^2.14.2"
+    "nan": "^2.17.0"
   },
   "devDependencies": {
     "chai": "^2.0.0",
