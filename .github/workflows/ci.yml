@@ -1,11 +1,18 @@
 name: ci
+
 on:
-  - pull_request
-  - push
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  release:
+    types:
+      - released
 
 jobs:
-  Test:
-    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+  test:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -14,27 +21,31 @@ jobs:
           - ubuntu-latest
           - macos-latest
           - windows-latest
-        node_version:
+        node:
           - 14
           - 16
           - 18
-    name: Node ${{ matrix.node_version }} on ${{ matrix.os }}
+    name: Node ${{ matrix.node }} on ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: true
-      - name: Cache
-        uses: actions/cache@v2
-        with:
-          path: |
-            'node_modules'
-          key: ${{ runner.os }}-${{ matrix.node_version }}-${{ hashFiles('package.json') }}
+          fetch-depth: 0
 
       - name: Setup node
-        uses: actions/setup-node@v2-beta
+        uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node_version }}
+          node-version: ${{ matrix.node }}
+
+      - name: Update node-gyp
+        if: ${{ matrix.os == 'windows-latest' && matrix.node == '14' }}
+        run: |
+          $WhereNode = Get-Command node | Select-Object -ExpandProperty Definition
+          $NodeDirPath = Split-Path $WhereNode -Parent
+          $NodeModulesPath = $NodeDirPath + "\node_modules\npm\node_modules\npm-lifecycle"
+          cd $NodeModulesPath
+          npm install node-gyp@9.x
 
       - name: Install dependencies
         run: npm install
@@ -47,9 +58,51 @@ jobs:
           npm run test:node
           npm run test:native
 
-  Skip:
-    if: contains(github.event.head_commit.message, '[skip ci]')
+  publish:
+    if: ${{ github.event_name == 'release' }}
+    name: Publishing to NPM
     runs-on: ubuntu-latest
+    needs: test
     steps:
-      - name: Skip CI 🚫
-        run: echo skip ci
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+          fetch-depth: 0
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          registry-url: https://registry.npmjs.org
+      - run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  prebuild:
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
+      fail-fast: false
+    name: Prebuild on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    needs: publish
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+          fetch-depth: 0
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - run: npm install --ignore-scripts
+      - run: npx --no-install prebuild -r node -t 10.0.0 -t 12.0.0 -t 14.0.0 -t 16.0.0 -t 18.0.0 -u ${{ secrets.GH_TOKEN }}
+      # Prebuilding for Electron on Windows fails with
+      #   win_delay_load_hook.cc
+      # text-buffer-wrapper.obj : error LNK2019: unresolved external symbol "__declspec(dllimport) public: class std::shared_ptr<class v8::BackingStore> __cdecl v8::ArrayBuffer::GetBackingStore(void)" (__imp_?GetBackingStore@ArrayBuffer@v8@@QEAA?AV?$shared_ptr@VBackingStore@v8@@@std@@XZ) referenced in function "public: virtual void __cdecl `private: static void __cdecl TextBufferWrapper::find_words_with_subsequence_in_range(class Nan::FunctionCallbackInfo<class v8::Value> const &)'::`2'::FindWordsWithSubsequenceInRangeWorker::HandleOKCallback(void)" (?HandleOKCallback@FindWordsWithSubsequenceInRangeWorker@?1??find_words_with_subsequence_in_range@TextBufferWrapper@@CAXAEBV?$FunctionCallbackInfo@VValue@v8@@@Nan@@@Z@UEAAXXZ) [D:\a\superstring\superstring\build\superstring.vcxproj]
+      - if: matrix.os != 'windows-latest'
+        run: npx --no-install prebuild -r electron -t 21.0.0 -t 22.0.0 -t 23.0.0 -u ${{ secrets.GH_TOKEN }}
+      # - if: matrix.os == 'windows-latest'
+      #   run: npx --no-install prebuild -r electron -t 21.0.0 -t 22.0.0 -t 23.0.0 --arch ia32 -u ${{ secrets.GH_TOKEN }}
+      - if: matrix.os == 'macos-latest'
+        run: npx --no-install prebuild -r electron -t 21.0.0 -t 22.0.0 -t 23.0.0 --arch arm64 -u ${{ secrets.GH_TOKEN }}
