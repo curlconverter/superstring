@@ -21,6 +21,18 @@
               "src/core",
               "<!(node -e \"require('nan')\")"
             ],
+            "cflags_cc": ["-std=c++17"],
+            "xcode_settings": {
+                "MACOSX_DEPLOYMENT_TARGET": "10.7",
+                "OTHER_CPLUSPLUSFLAGS": ["-std=c++17", "-stdlib=libc++"],
+            },
+            "msvs_settings": {
+                "VCCLCompilerTool": {
+                    "AdditionalOptions": [
+                        "/std:c++17",
+                    ],
+                },
+            },
         },
         {
             "target_name": "superstring_core",
@@ -44,6 +56,18 @@
             "include_dirs": [
                 "vendor/libcxx"
             ],
+            "cflags_cc": ["-std=c++17"],
+            "xcode_settings": {
+                "MACOSX_DEPLOYMENT_TARGET": "10.7",
+                "OTHER_CPLUSPLUSFLAGS": ["-std=c++17", "-stdlib=libc++"],
+            },
+            "msvs_settings": {
+                "VCCLCompilerTool": {
+                    "AdditionalOptions": [
+                        "/std:c++17",
+                    ],
+                },
+            },
             "conditions": [
                 ['OS=="mac"', {
                     'link_settings': {
@@ -67,7 +91,8 @@
     ],
 
     "variables": {
-        "tests": 0
+        "tests": 0,
+        "openssl_fips": ""
     },
 
     "conditions": [
@@ -105,6 +130,8 @@
                         "xcode_settings": {
                             "GCC_ENABLE_CPP_EXCEPTIONS": "YES",
                             'MACOSX_DEPLOYMENT_TARGET': '10.8',
+                            'CLANG_CXX_LIBRARY': 'libc++',
+                            'CLANG_CXX_LANGUAGE_STANDARD':'c++17',
                         }
                     }]
                 ]
@@ -113,12 +140,12 @@
     ],
 
     "target_defaults": {
-        "cflags_cc": ["-std=c++11"],
+        "cflags_cc": ["-std=c++17"],
         "conditions": [
             ['OS=="mac"', {
                 "xcode_settings": {
                     'CLANG_CXX_LIBRARY': 'libc++',
-                    'CLANG_CXX_LANGUAGE_STANDARD':'c++11',
+                    'CLANG_CXX_LANGUAGE_STANDARD':'c++17',
                 }
             }],
             ['OS=="win"', {
@@ -128,6 +155,13 @@
                 "defines": [
                     "NOMINMAX"
                 ],
+                "msvs_settings": {
+                    "VCCLCompilerTool": {
+                        "AdditionalOptions": [
+                            "/std:c++17",
+                        ],
+                    },
+                },
             }]
         ]
     }

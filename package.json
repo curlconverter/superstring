@@ -5,8 +5,8 @@
   "main": "./index",
   "browser": "./browser",
   "scripts": {
-    "build:node": "node-gyp rebuild",
-    "build": "npm run build:node",
+    "install": "prebuild-install || node-gyp rebuild",
+    "build": "node-gyp build",
     "test:native": "node ./script/test-native.js",
     "test:node": "mocha test/js/*.js",
     "test": "npm run test:node",
@@ -31,10 +31,17 @@
   "devDependencies": {
     "chai": "^2.0.0",
     "mocha": "^2.3.4",
-    "random-seed": "^0.2.0",
+    "node-gyp": "^9.3.1",
+    "prebuild": "^11.0.4",
+    "random-seed": "^0.3.0",
     "standard": "^4.5.4",
-    "temp": "^0.8.3",
+    "temp": "^0.9.4",
     "unzip": "^0.1.11"
+  },
+  "overrides": {
+    "prebuild": {
+      "node-gyp": "$node-gyp"
+    }
   },
   "standard": {
     "global": [
