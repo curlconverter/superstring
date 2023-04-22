@@ -96,7 +96,7 @@ jobs:
         with:
           node-version: 18
       - run: npm install --ignore-scripts
-      - run: npx --no-install prebuild -r node -t 10.0.0 -t 12.0.0 -t 14.0.0 -t 16.0.0 -t 18.0.0 -u ${{ secrets.GH_TOKEN }}
+      - run: npx --no-install prebuild -r node -t 10.0.0 -t 12.0.0 -t 14.0.0 -t 16.0.0 -t 18.0.0 -t 20.0.0 -u ${{ secrets.GH_TOKEN }}
       # Prebuilding for Electron on Windows fails with
       #   win_delay_load_hook.cc
       # text-buffer-wrapper.obj : error LNK2019: unresolved external symbol "__declspec(dllimport) public: class std::shared_ptr<class v8::BackingStore> __cdecl v8::ArrayBuffer::GetBackingStore(void)" (__imp_?GetBackingStore@ArrayBuffer@v8@@QEAA?AV?$shared_ptr@VBackingStore@v8@@@std@@XZ) referenced in function "public: virtual void __cdecl `private: static void __cdecl TextBufferWrapper::find_words_with_subsequence_in_range(class Nan::FunctionCallbackInfo<class v8::Value> const &)'::`2'::FindWordsWithSubsequenceInRangeWorker::HandleOKCallback(void)" (?HandleOKCallback@FindWordsWithSubsequenceInRangeWorker@?1??find_words_with_subsequence_in_range@TextBufferWrapper@@CAXAEBV?$FunctionCallbackInfo@VValue@v8@@@Nan@@@Z@UEAAXXZ) [D:\a\superstring\superstring\build\superstring.vcxproj]
